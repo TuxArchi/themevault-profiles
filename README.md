@@ -25,7 +25,7 @@ A mano:
 
    ```bash
    themevault export-profile <tu-copia> \
-       --name "Mi estilo" --author tu-usuario \
+       --name "Mi estilo" --author tu-usuario-de-github \
        --license CC-BY-SA-4.0
    ```
 
@@ -47,6 +47,11 @@ A mano:
 - **Sin datos personales**: ni rutas (`/home/...`, `~`), ni historial, ni
   nombres de archivos del escritorio, ni capturas que muestren tu fondo.
   El validador los rechaza.
+- **Autor = tu usuario de GitHub.** El `author` tiene que coincidir con la
+  cuenta que abre el pull request; el CI lo verifica. Un perfil no se puede
+  publicar ni editar a nombre de otra persona. Si un id ya existe, pertenece a
+  quien lo publicó primero. Los maintainers de `MAINTAINERS` pueden hacer
+  importaciones y el PR queda registrado.
 - **Licencia declarada** de esta lista: `CC0-1.0`, `CC-BY-4.0`,
   `CC-BY-SA-4.0`, `MIT`, `GPL-3.0-or-later`.
 - **Nombre de tema en `requires`**, no el archivo: quien lo aplique lo instala

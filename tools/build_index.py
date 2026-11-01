@@ -26,6 +26,7 @@ BACKENDS = {"ini", "dconf", "xfconf"}
 UNSAFE = re.compile(r"(^[/~])|(file:)|(\.\./)|([A-Za-z]:\\\\)")
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
+HANDLE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$")
 
 ALLOWED_FILES = {"profile.json", "cover.png"}
 MAX_PROFILE = 64 * 1024
@@ -64,6 +65,8 @@ def validate(folder: Path) -> tuple[dict | None, list[str]]:
         problems.append(f"{folder.name}: falta name")
     if not str(data.get("author", "")).strip():
         problems.append(f"{folder.name}: falta author")
+    elif not HANDLE.fullmatch(str(data.get("author", "")).strip()):
+        problems.append(f"{folder.name}: author debe ser un usuario de GitHub (sin @)")
     if data.get("license") not in LICENSES:
         problems.append(f"{folder.name}: licencia no permitida")
     if data.get("desktop") not in DESKTOPS:
