@@ -8,6 +8,9 @@ Reglas:
 
 Uso (CI):
     python tools/check_author.py --author "$PR_AUTHOR" --base origin/main
+
+En CI conviene ejecutar la copia de la rama base (`git show origin/main:tools/...`)
+para que un PR no pueda modificar el validador ni MAINTAINERS y auto-habilitarse.
 """
 
 from __future__ import annotations
@@ -20,7 +23,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROFILES = ROOT / "profiles"
-MAINTAINERS = ROOT / "MAINTAINERS"
 
 
 def _run(command: list[str]) -> subprocess.CompletedProcess:
@@ -66,11 +68,13 @@ def local_author(profile_id: str) -> str:
         return ""
 
 
-def maintainers() -> set[str]:
-    if not MAINTAINERS.is_file():
+def maintainers(base: str) -> set[str]:
+    """Lista de maintainers de la rama base (nunca la del PR)."""
+    proc = _run(["git", "show", f"{base}:MAINTAINERS"])
+    if proc.returncode != 0:
         return set()
     out = set()
-    for line in MAINTAINERS.read_text(encoding="utf-8").splitlines():
+    for line in proc.stdout.splitlines():
         text = line.strip()
         if text and not text.startswith("#"):
             out.add(text.lower())
@@ -81,7 +85,13 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author", required=True, help="usuario que abrió el PR")
     parser.add_argument("--base", default="origin/main", help="rama base del PR")
+    parser.add_argument("--root", help="raíz del repositorio (por defecto, la del script)")
     args = parser.parse_args(argv)
+
+    global ROOT, PROFILES
+    if args.root:
+        ROOT = Path(args.root).resolve()
+        PROFILES = ROOT / "profiles"
 
     author = args.author.strip()
     if not author:
@@ -93,7 +103,7 @@ def main(argv: list[str]) -> int:
         print("Sin perfiles modificados: nada que verificar.")
         return 0
 
-    if author.lower() in maintainers():
+    if author.lower() in maintainers(args.base):
         print(f"Override de maintainer @{author}: se permite publicar en nombre de otro.")
         return 0
 

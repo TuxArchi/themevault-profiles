@@ -4,6 +4,7 @@
 Uso:
     python tools/build_index.py            # reescribe index.json
     python tools/build_index.py --check    # falla si index.json no esta al dia
+    python tools/build_index.py --root DIR # valida otro checkout (CI con el script de la base)
 """
 
 from __future__ import annotations
@@ -140,6 +141,18 @@ def build() -> tuple[dict, list[str]]:
 
 
 def main(argv: list[str]) -> int:
+    global ROOT, PROFILES, INDEX
+    if "--root" in argv:
+        pos = argv.index("--root")
+        try:
+            ROOT = Path(argv[pos + 1]).resolve()
+        except IndexError:
+            print("--root necesita una ruta")
+            return 1
+        PROFILES = ROOT / "profiles"
+        INDEX = ROOT / "index.json"
+        argv = argv[:pos] + argv[pos + 2:]
+
     index, problems = build()
     if problems:
         print("Perfiles con problemas:")
