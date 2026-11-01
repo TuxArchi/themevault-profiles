@@ -4,9 +4,11 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   profiles:
+    name: profiles
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,3 +19,29 @@ jobs:
 
       - name: Validar perfiles e índice
         run: python tools/build_index.py --check
+
+  author:
+    name: author
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Traer la rama base
+        if: github.event_name == 'pull_request'
+        run: git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+
+      - name: Verificar autoría del perfil
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          if [ -z "$PR_AUTHOR" ]; then
+            echo "Push a main: la autoría ya se revisó en el PR."
+            exit 0
+          fi
+          python tools/check_author.py --author "$PR_AUTHOR" --base "origin/${{ github.base_ref }}"
