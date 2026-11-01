@@ -6,19 +6,32 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  BASE: ${{ github.base_ref || 'main' }}
+
 jobs:
   profiles:
     name: profiles
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
+      - name: Traer la rama base
+        if: github.event_name == 'pull_request'
+        run: git fetch --no-tags origin "+refs/heads/${BASE}:refs/remotes/origin/${BASE}"
+
+      # El validador sale de la rama base: un PR no puede reescribirlo para
+      # que acepte lo que quiera.
       - name: Validar perfiles e índice
-        run: python tools/build_index.py --check
+        run: |
+          git show "origin/${BASE}:tools/build_index.py" > /tmp/build_index.py
+          python /tmp/build_index.py --check --root "$GITHUB_WORKSPACE"
 
   author:
     name: author
@@ -34,7 +47,7 @@ jobs:
 
       - name: Traer la rama base
         if: github.event_name == 'pull_request'
-        run: git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+        run: git fetch --no-tags origin "+refs/heads/${BASE}:refs/remotes/origin/${BASE}"
 
       - name: Verificar autoría del perfil
         env:
@@ -44,4 +57,7 @@ jobs:
             echo "Push a main: la autoría ya se revisó en el PR."
             exit 0
           fi
-          python tools/check_author.py --author "$PR_AUTHOR" --base "origin/${{ github.base_ref }}"
+          # Script y MAINTAINERS de la base: un PR no puede auto-habilitarse.
+          git show "origin/${BASE}:tools/check_author.py" > /tmp/check_author.py
+          python /tmp/check_author.py --root "$GITHUB_WORKSPACE" \
+            --author "$PR_AUTHOR" --base "origin/${BASE}"
