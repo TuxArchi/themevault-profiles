@@ -126,6 +126,8 @@ def build() -> tuple[dict, list[str]]:
                 "license": data["license"],
                 "desktop": data["desktop"],
                 "description": str(data.get("description", ""))[:200],
+                "requires": data.get("requires") or {},
+                "settings": len(data.get("settings") or []),
                 "palette": preview.get("palette") or [],
                 "cover": str(preview.get("cover") or ""),
                 "sha256": digest,

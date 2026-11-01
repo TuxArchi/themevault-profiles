@@ -8,6 +8,13 @@
       "license": "CC-BY-SA-4.0",
       "desktop": "kde",
       "description": "Paleta oscura calida con acentos lavanda, sobre Plasma con iconos Papirus.",
+      "requires": {
+        "color_scheme": "CatppuccinMocha",
+        "icons": "Papirus-Dark",
+        "cursor": "Breeze",
+        "plasma_style": "breeze"
+      },
+      "settings": 4,
       "palette": [
         "#1e1e2e",
         "#181825",
@@ -25,6 +32,12 @@
       "license": "CC0-1.0",
       "desktop": "gnome",
       "description": "Adwaita oscuro con iconos Papirus y cursores Breeze, sin extensiones.",
+      "requires": {
+        "gtk": "Adwaita-dark",
+        "icons": "Papirus",
+        "cursor": "Breeze"
+      },
+      "settings": 4,
       "palette": [
         "#242424",
         "#303030",
@@ -42,6 +55,12 @@
       "license": "CC-BY-SA-4.0",
       "desktop": "kde",
       "description": "Azules frios y grises profundos, pensado para sesiones largas de noche.",
+      "requires": {
+        "color_scheme": "Nordic",
+        "icons": "Papirus-Dark",
+        "cursor": "Breeze"
+      },
+      "settings": 2,
       "palette": [
         "#2e3440",
         "#3b4252",
