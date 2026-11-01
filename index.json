@@ -4,7 +4,7 @@
     {
       "id": "catppuccin-mocha-kde",
       "name": "Catppuccin Mocha",
-      "author": "TuxArchi",
+      "author": "otra-cuenta",
       "license": "CC-BY-SA-4.0",
       "desktop": "kde",
       "description": "Paleta oscura calida con acentos lavanda, sobre Plasma con iconos Papirus.",
@@ -23,7 +23,7 @@
         "#cdd6f4"
       ],
       "cover": "cover.png",
-      "sha256": "4a68f36870185c7a18d728ee20bd725b9f3b87e1330f16aaea02a88e07865aba"
+      "sha256": "732c561bd21bd0937cd1589a69d540633c136ad4d0280e62e77d7427fad355b5"
     },
     {
       "id": "gnome-oscuro-papirus",
