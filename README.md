@@ -8,7 +8,20 @@ datos personales. Los temas se instalan aparte (paquete de la distro o tienda).
 
 ## Cómo publicar tu perfil
 
-1. Exportalo desde la app o la terminal:
+La forma más corta, con el repositorio clonado y `themevault` instalado:
+
+```bash
+themevault publish-profile ~/themevault-perfiles/mi-estilo --pr
+```
+
+Valida el perfil, lo copia a `profiles/<id>/`, regenera `index.json`, crea la
+rama, la sube y abre el pull request (pide confirmación). Sin `--pr` deja el
+commit local y muestra los comandos.
+
+A mano:
+
+1. Exportalo desde la app (botón **Compartir…** en el detalle de una copia) o
+   desde la terminal:
 
    ```bash
    themevault export-profile <tu-copia> \
