@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "id": "nord-oscuro-kde",
+  "name": "Nord Oscuro",
+  "author": "TuxArchi",
+  "license": "CC-BY-SA-4.0",
+  "desktop": "kde",
+  "description": "Azules frios y grises profundos, pensado para sesiones largas de noche.",
+  "created": "2026-11-01",
+  "preview": {
+    "cover": "cover.png",
+    "palette": [
+      "#2e3440",
+      "#3b4252",
+      "#434c5e",
+      "#88c0d0",
+      "#eceff4"
+    ]
+  },
+  "requires": {
+    "color_scheme": "Nordic",
+    "icons": "Papirus-Dark",
+    "cursor": "Breeze"
+  },
+  "settings": [
+    {
+      "backend": "ini",
+      "file": "kdeglobals",
+      "group": "General",
+      "key": "ColorScheme",
+      "value": "Nordic"
+    },
+    {
+      "backend": "ini",
+      "file": "kdeglobals",
+      "group": "Icons",
+      "key": "Theme",
+      "value": "Papirus-Dark"
+    }
+  ]
+}

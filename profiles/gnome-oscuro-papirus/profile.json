@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "id": "gnome-oscuro-papirus",
+  "name": "GNOME Oscuro con Papirus",
+  "author": "TuxArchi",
+  "license": "CC0-1.0",
+  "desktop": "gnome",
+  "description": "Adwaita oscuro con iconos Papirus y cursores Breeze, sin extensiones.",
+  "created": "2026-11-01",
+  "preview": {
+    "cover": "cover.png",
+    "palette": [
+      "#242424",
+      "#303030",
+      "#1c1c1c",
+      "#3584e4",
+      "#f6f5f4"
+    ]
+  },
+  "requires": {
+    "gtk": "Adwaita-dark",
+    "icons": "Papirus",
+    "cursor": "Breeze"
+  },
+  "settings": [
+    {
+      "backend": "dconf",
+      "path": "/org/gnome/desktop/interface/",
+      "key": "gtk-theme",
+      "value": "'Adwaita-dark'"
+    },
+    {
+      "backend": "dconf",
+      "path": "/org/gnome/desktop/interface/",
+      "key": "icon-theme",
+      "value": "'Papirus'"
+    },
+    {
+      "backend": "dconf",
+      "path": "/org/gnome/desktop/interface/",
+      "key": "cursor-theme",
+      "value": "'Breeze'"
+    },
+    {
+      "backend": "dconf",
+      "path": "/org/gnome/desktop/interface/",
+      "key": "color-scheme",
+      "value": "'prefer-dark'"
+    }
+  ]
+}

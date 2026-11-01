@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "profiles": [
+    {
+      "id": "catppuccin-mocha-kde",
+      "name": "Catppuccin Mocha",
+      "author": "TuxArchi",
+      "license": "CC-BY-SA-4.0",
+      "desktop": "kde",
+      "description": "Paleta oscura calida con acentos lavanda, sobre Plasma con iconos Papirus.",
+      "palette": [
+        "#1e1e2e",
+        "#181825",
+        "#313244",
+        "#89b4fa",
+        "#cdd6f4"
+      ],
+      "cover": "cover.png",
+      "sha256": "4a68f36870185c7a18d728ee20bd725b9f3b87e1330f16aaea02a88e07865aba"
+    },
+    {
+      "id": "gnome-oscuro-papirus",
+      "name": "GNOME Oscuro con Papirus",
+      "author": "TuxArchi",
+      "license": "CC0-1.0",
+      "desktop": "gnome",
+      "description": "Adwaita oscuro con iconos Papirus y cursores Breeze, sin extensiones.",
+      "palette": [
+        "#242424",
+        "#303030",
+        "#1c1c1c",
+        "#3584e4",
+        "#f6f5f4"
+      ],
+      "cover": "cover.png",
+      "sha256": "e6ecc1821bcaa5bba7656a0074a64fb5a1037b3232309719c513ff73de125a7b"
+    },
+    {
+      "id": "nord-oscuro-kde",
+      "name": "Nord Oscuro",
+      "author": "TuxArchi",
+      "license": "CC-BY-SA-4.0",
+      "desktop": "kde",
+      "description": "Azules frios y grises profundos, pensado para sesiones largas de noche.",
+      "palette": [
+        "#2e3440",
+        "#3b4252",
+        "#434c5e",
+        "#88c0d0",
+        "#eceff4"
+      ],
+      "cover": "cover.png",
+      "sha256": "69695b405c855fa5114c4824f84be921d5c4fa9c68bd87d221d9d4c85b9d24fa"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "id": "catppuccin-mocha-kde",
+  "name": "Catppuccin Mocha",
+  "author": "TuxArchi",
+  "license": "CC-BY-SA-4.0",
+  "desktop": "kde",
+  "description": "Paleta oscura calida con acentos lavanda, sobre Plasma con iconos Papirus.",
+  "created": "2026-11-01",
+  "preview": {
+    "cover": "cover.png",
+    "palette": [
+      "#1e1e2e",
+      "#181825",
+      "#313244",
+      "#89b4fa",
+      "#cdd6f4"
+    ]
+  },
+  "requires": {
+    "color_scheme": "CatppuccinMocha",
+    "icons": "Papirus-Dark",
+    "cursor": "Breeze",
+    "plasma_style": "breeze"
+  },
+  "settings": [
+    {
+      "backend": "ini",
+      "file": "kdeglobals",
+      "group": "General",
+      "key": "ColorScheme",
+      "value": "CatppuccinMocha"
+    },
+    {
+      "backend": "ini",
+      "file": "kdeglobals",
+      "group": "Icons",
+      "key": "Theme",
+      "value": "Papirus-Dark"
+    },
+    {
+      "backend": "ini",
+      "file": "kcminputrc",
+      "group": "Mouse",
+      "key": "cursorTheme",
+      "value": "Breeze"
+    },
+    {
+      "backend": "ini",
+      "file": "gtk-3.0/settings.ini",
+      "group": "Settings",
+      "key": "gtk-theme-name",
+      "value": "catppuccin-mocha-gtk"
+    }
+  ]
+}
