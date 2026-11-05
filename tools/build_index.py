@@ -12,6 +12,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -47,14 +49,69 @@ SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 HANDLE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$")
 
-ALLOWED_FILES = {"profile.json", "cover.png"}
-MAX_PROFILE = 64 * 1024
-MAX_COVER = 1536 * 1024
+ALLOWED_FILES = {
+    "profile.json",
+    "cover.png",
+    "cover.jpg",
+    "wallpaper.jpg",
+    "wallpaper.jpeg",
+    "wallpaper.png",
+    "wallpaper.webp",
+    "wallpaper.mp4",
+    "plugins",
+    "assets",
+}
+MAX_PROFILE = 256 * 1024
+MAX_COVER = 3 * 1024 * 1024
+MAX_WALLPAPER = 60 * 1024 * 1024
+MAX_PLUGIN = 25 * 1024 * 1024
+SHA = re.compile(r"^[0-9a-f]{64}$")
+SECRET = re.compile(
+    r"(?i)(token|password|passwd|secret|api[_-]?key|authorization|bearer|"
+    r"ssh-|id_rsa|id_ed25519|\.ssh|\.env|file://|https?://|@[^ ]+\.[^ ]+)"
+)
 
 
 def safe(value: str) -> bool:
     text = str(value).strip()
     return bool(text) and len(text) <= 200 and not UNSAFE.search(text)
+
+
+def _sha(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _probe_video(path: Path) -> tuple[dict | None, str]:
+    ffprobe = shutil.which("ffprobe")
+    if ffprobe is None:
+        return None, "ffprobe no disponible"
+    try:
+        proc = subprocess.run(
+            [
+                ffprobe,
+                "-v",
+                "error",
+                "-print_format",
+                "json",
+                "-show_format",
+                "-show_streams",
+                str(path),
+            ],
+            capture_output=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None, "ffprobe fallo"
+    if proc.returncode != 0:
+        return None, "ffprobe rechazo el video"
+    try:
+        return json.loads(proc.stdout.decode("utf-8", "replace")), ""
+    except ValueError:
+        return None, "ffprobe devolvio JSON invalido"
 
 
 def validate(folder: Path) -> tuple[dict | None, list[str]]:
@@ -95,11 +152,11 @@ def validate(folder: Path) -> tuple[dict | None, list[str]]:
     cover = str(preview.get("cover") or "")
     if cover:
         file = folder / cover
-        if cover != "cover.png" or not file.is_file():
+        if cover not in ("cover.png", "cover.jpg") or not file.is_file():
             problems.append(f"{folder.name}: portada invalida")
         elif file.stat().st_size > MAX_COVER:
             problems.append(f"{folder.name}: portada demasiado grande")
-        elif file.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
+        elif cover == "cover.png" and file.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
             problems.append(f"{folder.name}: la portada no es PNG")
 
     for color in preview.get("palette") or []:
@@ -127,6 +184,126 @@ def validate(folder: Path) -> tuple[dict | None, list[str]]:
         if backend == "xfconf" and not (setting.get("channel") and setting.get("prop")):
             problems.append(f"{folder.name}: ajuste xfconf incompleto")
 
+    if data.get("name") and not safe(str(data["name"])):
+        problems.append(f"{folder.name}: nombre con ruta o dato sospechoso")
+    if data.get("description") and (
+        not safe(str(data["description"])) or SECRET.search(str(data["description"]))
+    ):
+        problems.append(f"{folder.name}: descripcion con dato sospechoso")
+
+    wallpaper = data.get("wallpaper") or {}
+    if wallpaper:
+        kind = wallpaper.get("kind")
+        if kind not in ("image", "video"):
+            problems.append(f"{folder.name}: wallpaper kind invalido")
+        if not SHA.fullmatch(str(wallpaper.get("sha256", ""))):
+            problems.append(f"{folder.name}: wallpaper sin sha256 valido")
+        for key in ("file", "fallback"):
+            name = str(wallpaper.get(key, "") or "")
+            if not name:
+                continue
+            file = folder / name
+            if Path(name).is_absolute() or ".." in Path(name).parts:
+                problems.append(f"{folder.name}: wallpaper ruta invalida {name}")
+            elif not file.is_file():
+                problems.append(f"{folder.name}: falta wallpaper {name}")
+            elif file.stat().st_size > MAX_WALLPAPER:
+                problems.append(f"{folder.name}: wallpaper demasiado grande")
+            elif key == "file" and _sha(file) != str(wallpaper.get("sha256", "")):
+                problems.append(f"{folder.name}: wallpaper no coincide con el sha256")
+        try:
+            if float(wallpaper.get("duration") or 0) > 600:
+                problems.append(f"{folder.name}: video demasiado largo")
+            if int(wallpaper.get("size") or 0) > MAX_WALLPAPER:
+                problems.append(f"{folder.name}: video demasiado grande")
+        except (TypeError, ValueError):
+            problems.append(f"{folder.name}: metadatos de wallpaper invalidos")
+
+        if kind == "video":
+            name = str(wallpaper.get("file", "") or "")
+            file = folder / name
+            if name and file.is_file():
+                probe, reason = _probe_video(file)
+                if probe is None:
+                    if reason != "ffprobe no disponible":
+                        problems.append(f"{folder.name}: no se pudo validar el video ({reason})")
+                else:
+                    streams = probe.get("streams") or []
+                    video = next(
+                        (s for s in streams if s.get("codec_type") == "video"), None
+                    )
+                    if video is None:
+                        problems.append(f"{folder.name}: el wallpaper no tiene video")
+                    elif str(video.get("codec_name")) != "h264":
+                        problems.append(f"{folder.name}: el video debe ser H.264")
+                    if any(s.get("codec_type") == "audio" for s in streams):
+                        problems.append(f"{folder.name}: el video no debe tener audio")
+                    try:
+                        duration = float(
+                            video.get("duration")
+                            or (probe.get("format") or {}).get("duration")
+                            or 0
+                        )
+                        if duration > 600:
+                            problems.append(f"{folder.name}: el video supera 10 minutos")
+                    except (TypeError, ValueError):
+                        pass
+
+    for plugin in data.get("plugins") or []:
+        name = str(plugin.get("file", "") or "")
+        target = str(plugin.get("target", "") or "")
+        file = folder / name
+        if not name or Path(name).is_absolute() or ".." in Path(name).parts:
+            problems.append(f"{folder.name}: plugin ruta invalida")
+        elif Path(name).parts[0] != "plugins":
+            problems.append(f"{folder.name}: plugin fuera de plugins/")
+        elif not name.endswith((".tar.gz", ".zip")):
+            problems.append(f"{folder.name}: formato de plugin no permitido")
+        elif not target.startswith("~/"):
+            problems.append(f"{folder.name}: plugin destino fuera del home")
+        elif not SHA.fullmatch(str(plugin.get("sha256", ""))):
+            problems.append(f"{folder.name}: plugin sin sha256")
+        elif not file.is_file():
+            problems.append(f"{folder.name}: falta plugin {name}")
+        elif file.stat().st_size > MAX_PLUGIN:
+            problems.append(f"{folder.name}: plugin demasiado grande")
+        elif _sha(file) != str(plugin.get("sha256", "")):
+            problems.append(f"{folder.name}: plugin no coincide con el sha256")
+
+    for asset in data.get("assets") or []:
+        name = str(asset.get("file", "") or "")
+        url = str(asset.get("url", "") or "")
+        if name:
+            file = folder / name
+            if Path(name).parts[0] != "assets" or Path(name).is_absolute() or ".." in Path(name).parts:
+                problems.append(f"{folder.name}: asset ruta invalida")
+            elif not name.endswith((".tar.gz", ".zip")):
+                problems.append(f"{folder.name}: asset formato no permitido")
+            elif not str(asset.get("target", "")).startswith("~/"):
+                problems.append(f"{folder.name}: asset destino fuera del home")
+            elif not file.is_file():
+                problems.append(f"{folder.name}: falta asset {name}")
+            elif file.stat().st_size > MAX_PLUGIN:
+                problems.append(f"{folder.name}: asset demasiado grande")
+            elif _sha(file) != str(asset.get("sha256", "")):
+                problems.append(f"{folder.name}: asset no coincide con el sha256")
+        if url and not (
+            url.startswith("https://github.com/")
+            or url.startswith("https://raw.githubusercontent.com/")
+            or url.startswith("https://objects.githubusercontent.com/")
+            or url.startswith("https://codeload.github.com/")
+        ):
+            problems.append(f"{folder.name}: asset con URL no permitida")
+        if not name and not url:
+            problems.append(f"{folder.name}: asset sin archivo ni URL")
+        if not SHA.fullmatch(str(asset.get("sha256", ""))):
+            problems.append(f"{folder.name}: asset sin sha256")
+
+    for entry in data.get("keybinds") or []:
+        text = " ".join(str(entry.get(key, "")) for key in ("arg", "description", "dispatcher"))
+        if entry.get("script") or UNSAFE.search(text) or SECRET.search(text):
+            problems.append(f"{folder.name}: atajo con ruta o secreto")
+
     return data, problems
 
 
@@ -140,21 +317,28 @@ def build() -> tuple[dict, list[str]]:
             continue
         digest = hashlib.sha256((folder / "profile.json").read_bytes()).hexdigest()
         preview = data.get("preview") or {}
-        entries.append(
-            {
-                "id": data["id"],
-                "name": data["name"],
-                "author": data["author"],
-                "license": data["license"],
-                "desktop": data["desktop"],
-                "description": str(data.get("description", ""))[:200],
-                "requires": data.get("requires") or {},
-                "settings": len(data.get("settings") or []),
-                "palette": preview.get("palette") or [],
-                "cover": str(preview.get("cover") or ""),
-                "sha256": digest,
-            }
-        )
+        entry = {
+            "id": data["id"],
+            "name": data["name"],
+            "author": data["author"],
+            "license": data["license"],
+            "desktop": data["desktop"],
+            "description": str(data.get("description", ""))[:200],
+            "requires": data.get("requires") or {},
+            "settings": len(data.get("settings") or []),
+            "palette": preview.get("palette") or [],
+            "cover": str(preview.get("cover") or ""),
+            "sha256": digest,
+        }
+        if data.get("wallpaper"):
+            entry["wallpaper"] = data["wallpaper"]
+        if data.get("plugins"):
+            entry["plugins"] = len(data["plugins"])
+        if data.get("assets"):
+            entry["assets"] = len(data["assets"])
+        if data.get("keybinds"):
+            entry["keybinds"] = len(data["keybinds"])
+        entries.append(entry)
     return {"schema": SCHEMA, "profiles": entries}, problems
 
 
