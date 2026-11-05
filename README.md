@@ -6,6 +6,9 @@ Un perfil **no es una copia**: es la descripción del aspecto —tema, iconos,
 cursores, esquema de color y ajustes— sin archivos de tema, sin rutas y sin
 datos personales. Los temas se instalan aparte (paquete de la distro o tienda).
 
+Escritorios admitidos: `kde`, `gnome`, `xfce`, `hyprland`, `cinnamon`, `mate`,
+`budgie`, `lxqt` y `other`.
+
 ## Cómo publicar tu perfil
 
 La forma más corta, con el repositorio clonado y `themevault` instalado:
@@ -56,6 +59,10 @@ A mano:
   `CC-BY-SA-4.0`, `MIT`, `GPL-3.0-or-later`.
 - **Nombre de tema en `requires`**, no el archivo: quien lo aplique lo instala
   por su cuenta.
+- **Hyprland**: un perfil puede declarar `"desktop": "hyprland"` y usar
+  `requires` para iconos, cursor o GTK. Los atajos, comandos y archivos de
+  configuración de Hyprland **no** se publican; nunca se incluyen en
+  `profile.json`.
 
 ## Estructura
 
