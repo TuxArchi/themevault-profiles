@@ -2,9 +2,10 @@
 
 Configuraciones de escritorio que la app muestra en su sección **Comunidad**.
 
-Un perfil **no es una copia**: es la descripción del aspecto —tema, iconos,
-cursores, esquema de color y ajustes— sin archivos de tema, sin rutas y sin
-datos personales. Los temas se instalan aparte (paquete de la distro o tienda).
+Un perfil es un **bundle aplicable**: fondo (imagen o video), apariencia,
+layout de paneles/widgets, atajos seguros y plugins declarados. No incluye
+historial, tokens, cuentas, capturas del escritorio, scripts personales ni
+configuración interna de shells.
 
 Escritorios admitidos: `kde`, `gnome`, `xfce`, `hyprland`, `niri`, `sway`,
 `river`, `wayfire`, `labwc`, `cinnamon`, `mate`, `budgie`, `lxqt`, `i3`,
@@ -46,11 +47,11 @@ A mano:
 
 ## Reglas
 
-- **Solo configuración + portada.** Nada de binarios, scripts ni archivos de
-  tema.
+- **Solo personalización declarada.** Fondo, apariencia, layout, atajos seguros,
+  plugins con hash/licencia y una portada generada desde el fondo.
 - **Sin datos personales**: ni rutas (`/home/...`, `~`), ni historial, ni
-  nombres de archivos del escritorio, ni capturas que muestren tu fondo.
-  El validador los rechaza.
+  tokens, ni cuentas, ni capturas de ventanas, ni scripts personales, ni
+  configuración interna de shells. El validador los rechaza.
 - **Autor = tu usuario de GitHub.** El `author` tiene que coincidir con la
   cuenta que abre el pull request; el CI lo verifica. Un perfil no se puede
   publicar ni editar a nombre de otra persona. Si un id ya existe, pertenece a
@@ -69,10 +70,18 @@ A mano:
 ## Estructura
 
 ```
-index.json                     ← generado, no editar a mano
+index.json                        ← generado, no editar a mano
 profiles/<id>/profile.json
-profiles/<id>/cover.png        ← opcional, PNG < 1.5 MB
+profiles/<id>/cover.jpg|png       ← opcional, < 3 MB
+profiles/<id>/wallpaper.jpg|png   ← opcional
+profiles/<id>/wallpaper.mp4       ← opcional, H.264 sin audio, <= 50 MB
+profiles/<id>/plugins/*.tar.gz    ← opcional, <= 25 MB por plugin
+profiles/<id>/assets/             ← referencias GitHub verificadas
 ```
+
+Los videos se validan con `ffprobe`: H.264, sin audio, máximo 10 minutos y
+50 MB. Los plugins deben traer `sha256`, licencia y un destino dentro de `~/`.
+No se aceptan scripts de instalación ni rutas absolutas.
 
 El índice guarda el `sha256` de cada `profile.json`: la app lo verifica al
 descargar.
