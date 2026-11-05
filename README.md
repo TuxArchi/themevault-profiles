@@ -7,7 +7,8 @@ cursores, esquema de color y ajustes— sin archivos de tema, sin rutas y sin
 datos personales. Los temas se instalan aparte (paquete de la distro o tienda).
 
 Escritorios admitidos: `kde`, `gnome`, `xfce`, `hyprland`, `niri`, `sway`,
-`river`, `wayfire`, `labwc`, `cinnamon`, `mate`, `budgie`, `lxqt` y `other`.
+`river`, `wayfire`, `labwc`, `cinnamon`, `mate`, `budgie`, `lxqt`, `i3`,
+`openbox`, `cosmic` y `other`.
 
 ## Cómo publicar tu perfil
 
@@ -59,10 +60,11 @@ A mano:
   `CC-BY-SA-4.0`, `MIT`, `GPL-3.0-or-later`.
 - **Nombre de tema en `requires`**, no el archivo: quien lo aplique lo instala
   por su cuenta.
-- **Compositores Wayland**: un perfil puede declarar `hyprland`, `niri`,
-  `sway`, `river`, `wayfire` o `labwc`, y usar `requires` para iconos, cursor
-  o GTK. Los atajos, comandos y archivos de configuración del compositor
-  **no** se publican; nunca se incluyen en `profile.json`.
+- **Escritorios y compositores**: un perfil puede declarar `cinnamon`, `mate`,
+  `budgie`, `lxqt`, `i3`, `openbox`, `cosmic`, `hyprland`, `niri`, `sway`,
+  `river`, `wayfire` o `labwc`, y usar `requires` para iconos, cursor o GTK.
+  Los atajos, comandos y archivos de configuración **no** se publican; nunca
+  se incluyen en `profile.json`.
 
 ## Estructura
 

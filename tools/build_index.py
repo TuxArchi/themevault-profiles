@@ -34,6 +34,9 @@ DESKTOPS = {
     "mate",
     "budgie",
     "lxqt",
+    "i3",
+    "openbox",
+    "cosmic",
     "other",
 }
 LICENSES = {"CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "MIT", "GPL-3.0-or-later"}
