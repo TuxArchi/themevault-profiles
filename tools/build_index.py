@@ -20,7 +20,17 @@ PROFILES = ROOT / "profiles"
 INDEX = ROOT / "index.json"
 
 SCHEMA = 1
-DESKTOPS = {"kde", "gnome", "xfce", "cinnamon", "mate", "budgie", "lxqt", "other"}
+DESKTOPS = {
+    "kde",
+    "gnome",
+    "xfce",
+    "hyprland",
+    "cinnamon",
+    "mate",
+    "budgie",
+    "lxqt",
+    "other",
+}
 LICENSES = {"CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "MIT", "GPL-3.0-or-later"}
 REQUIRES = {"plasma_style", "color_scheme", "icons", "cursor", "gtk", "packages"}
 BACKENDS = {"ini", "dconf", "xfconf"}
